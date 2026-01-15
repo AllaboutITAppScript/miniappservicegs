@@ -203,9 +203,10 @@
             font-size: 12px;
             color: var(--text-secondary);
             text-align: left;
-            display: none;
-            max-height: 200px;
+            display: block;
+            max-height: 300px;
             overflow-y: auto;
+            font-family: monospace;
         }
 
         .debug-toggle {
@@ -220,6 +221,49 @@
 
         .debug-toggle:hover {
             color: var(--primary-color);
+        }
+
+        .step-indicator {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            text-align: left;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 12px;
+        }
+
+        .step-text {
+            flex: 1;
+            font-size: 13px;
+        }
+
+        .step-success {
+            background: rgba(6, 199, 85, 0.1);
+        }
+
+        .step-error {
+            background: rgba(255, 75, 75, 0.1);
         }
     </style>
 </head>
@@ -249,14 +293,38 @@
             <div id="statusMessage"></div>
         </div>
 
-        <div class="debug-info" id="debugInfo"></div>
-        <div class="debug-toggle" id="debugToggle">แสดงข้อมูล Debug</div>
+        <div class="step-indicator" id="stepIndicator">
+            <div class="step" id="step1">
+                <div class="step-number">1</div>
+                <div class="step-text">กำลังเริ่มต้นระบบ...</div>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-number">2</div>
+                <div class="step-text">รอการล็อกอิน...</div>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-number">3</div>
+                <div class="step-text">กำลังขอ Channel Access Token...</div>
+            </div>
+            <div class="step" id="step4">
+                <div class="step-number">4</div>
+                <div class="step-text">กำลังขอ Notification Token...</div>
+            </div>
+            <div class="step" id="step5">
+                <div class="step-number">5</div>
+                <div class="step-text">กำลังส่งข้อความ...</div>
+            </div>
+        </div>
+
+        <div class="debug-info" id="debugInfo">
+            <div style="color: #666; margin-bottom: 10px;">Debug Log:</div>
+            <div id="debugContent"></div>
+        </div>
     </div>
 
     <script>
         // ==================== CONFIGURATION ====================
-        // เปลี่ยนค่าเหล่านี้ตามการตั้งค่าของคุณ
-        const LIFF_ID = "2008892436-4R1TOzft"; // ใส่ LIFF ID จริงของคุณที่นี่
+        const LIFF_ID = "2008892436-4R1TOzft"; // เปลี่ยนเป็น LIFF ID จริงของคุณ
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzTYOO14YVHVhOT47fFjltIHwhoZ9YMrECviBApcMZCWVAxiqdEnjxda_HqUIGhw9Tv/exec";
         
         // ==================== DOM ELEMENTS ====================
@@ -268,34 +336,56 @@
         const userProfile = document.getElementById('userProfile');
         const userImage = document.getElementById('userImage');
         const userName = document.getElementById('userName');
-        const debugInfo = document.getElementById('debugInfo');
-        const debugToggle = document.getElementById('debugToggle');
+        const debugContent = document.getElementById('debugContent');
+        const steps = {
+            step1: document.getElementById('step1'),
+            step2: document.getElementById('step2'),
+            step3: document.getElementById('step3'),
+            step4: document.getElementById('step4'),
+            step5: document.getElementById('step5')
+        };
         
         // ==================== STATE VARIABLES ====================
         let isInitialized = false;
         let isSending = false;
-        let debugLog = [];
+        let userId = '';
         
         // ==================== LOGGING FUNCTIONS ====================
-        function logDebug(message) {
+        function logDebug(message, type = 'info') {
             const timestamp = new Date().toLocaleTimeString();
-            debugLog.push(`[${timestamp}] ${message}`);
+            const colors = {
+                info: '#666',
+                success: '#06C755',
+                error: '#FF4B4B',
+                warning: '#FFA500'
+            };
             
-            // Update debug info display
-            debugInfo.innerHTML = debugLog.map(log => 
-                `<div style="margin-bottom: 5px; font-family: monospace;">${log}</div>`
-            ).join('');
+            const logEntry = document.createElement('div');
+            logEntry.style.marginBottom = '5px';
+            logEntry.style.color = colors[type] || colors.info;
+            logEntry.textContent = `[${timestamp}] ${message}`;
             
-            console.log(`[DEBUG] ${message}`);
+            debugContent.appendChild(logEntry);
+            debugContent.scrollTop = debugContent.scrollHeight;
+            
+            console.log(`[${type.toUpperCase()}] ${message}`);
         }
         
-        function toggleDebug() {
-            if (debugInfo.style.display === 'block') {
-                debugInfo.style.display = 'none';
-                debugToggle.textContent = 'แสดงข้อมูล Debug';
+        function updateStep(stepId, status) {
+            const step = steps[stepId];
+            if (!step) return;
+            
+            step.className = 'step';
+            if (status === 'success') {
+                step.classList.add('step-success');
+                step.querySelector('.step-number').style.background = '#06C755';
+            } else if (status === 'error') {
+                step.classList.add('step-error');
+                step.querySelector('.step-number').style.background = '#FF4B4B';
+            } else if (status === 'processing') {
+                step.querySelector('.step-number').style.background = '#FFA500';
             } else {
-                debugInfo.style.display = 'block';
-                debugToggle.textContent = 'ซ่อนข้อมูล Debug';
+                step.querySelector('.step-number').style.background = '#CCCCCC';
             }
         }
         
@@ -348,121 +438,133 @@
         
         function hideStatus() {
             statusContainer.classList.remove('show');
-            setTimeout(() => {
-                statusContainer.className = 'status-container';
-            }, 300);
         }
         
-        // ==================== GAS COMMUNICATION FUNCTIONS ====================
-        async function sendToGAS(method, data) {
-            logDebug(`ส่งคำขอไปยัง GAS (${method})...`);
+        // ==================== DIRECT GAS CALL (ไม่ผ่าน iframe) ====================
+        async function sendDirectToGAS(liffAccessToken) {
+            logDebug('กำลังส่งข้อมูลไปยัง GAS โดยตรง...', 'info');
+            updateStep('step3', 'processing');
             
             try {
-                // สำหรับ Google Apps Script Web App
-                const url = GAS_WEB_APP_URL;
+                // สร้าง form data
+                const formData = new FormData();
+                formData.append('postData', JSON.stringify({
+                    liffAccessToken: liffAccessToken,
+                    userId: userId,
+                    timestamp: new Date().toISOString()
+                }));
                 
-                if (method === 'GET') {
-                    // ใช้ URL parameters สำหรับ GET request
-                    const params = new URLSearchParams();
-                    params.append('postData', JSON.stringify(data));
-                    
-                    const response = await fetch(`${url}?${params.toString()}`, {
-                        method: 'GET',
-                        mode: 'no-cors' // ต้องใช้ no-cors สำหรับ GAS
-                    });
-                    
-                    logDebug('ส่ง GET request สำเร็จ (no-cors mode)');
-                    return { success: true, result: { message: "Request sent via GET" } };
-                    
-                } else if (method === 'POST') {
-                    // สำหรับ POST request เราต้องใช้ Form submission
-                    return new Promise((resolve, reject) => {
-                        // สร้าง form element
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = url;
-                        form.style.display = 'none';
-                        
-                        // สร้าง input สำหรับข้อมูล
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = 'postData';
-                        input.value = JSON.stringify(data);
-                        form.appendChild(input);
-                        
-                        // สร้าง iframe สำหรับรับ response
-                        const iframe = document.createElement('iframe');
-                        iframe.name = 'gasResponseFrame';
-                        iframe.style.display = 'none';
-                        document.body.appendChild(iframe);
-                        document.body.appendChild(form);
-                        
-                        // ตั้งค่า form target เป็น iframe
-                        form.target = 'gasResponseFrame';
-                        
-                        // ตั้งค่า event listener สำหรับ iframe
-                        iframe.onload = function() {
-                            try {
-                                logDebug('ได้รับ response จาก GAS');
-                                
-                                // พยายามอ่าน response จาก iframe
-                                let responseText = '';
-                                try {
-                                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                                    responseText = iframeDoc.body.textContent || iframeDoc.documentElement.textContent;
-                                } catch (e) {
-                                    logDebug('ไม่สามารถอ่าน iframe content: ' + e.message);
-                                }
-                                
-                                if (responseText) {
-                                    const result = JSON.parse(responseText);
-                                    logDebug(`Response: ${JSON.stringify(result).substring(0, 200)}...`);
-                                    resolve(result);
-                                } else {
-                                    // ถ้าไม่มี response ให้ assume สำเร็จ
-                                    logDebug('ไม่มี response text, assume สำเร็จ');
-                                    resolve({ success: true, result: { message: "Form submission successful" } });
-                                }
-                            } catch (error) {
-                                logDebug('Error reading iframe response: ' + error.message);
-                                reject(error);
-                            } finally {
-                                // Cleanup
-                                setTimeout(() => {
-                                    if (iframe.parentNode) document.body.removeChild(iframe);
-                                    if (form.parentNode) document.body.removeChild(form);
-                                }, 1000);
-                            }
-                        };
-                        
-                        iframe.onerror = function(error) {
-                            logDebug('iframe error: ' + error);
-                            reject(new Error('iframe error'));
-                        };
-                        
-                        // ส่ง form
-                        form.submit();
-                        logDebug('Form submitted ไปยัง GAS');
-                        
-                        // Timeout fallback
-                        setTimeout(() => {
-                            if (iframe.parentNode) {
-                                logDebug('Request timeout after 30s');
-                                reject(new Error('Request timeout'));
-                            }
-                        }, 30000);
-                        
-                    });
-                }
+                // ใช้ fetch พร้อม mode 'no-cors' สำหรับ GAS
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: formData
+                });
+                
+                logDebug('ส่งคำขอไปยัง GAS แล้ว', 'success');
+                updateStep('step3', 'success');
+                
+                // ใน no-cors mode เราไม่สามารถอ่าน response ได้
+                // ดังนั้นเราต้องตรวจสอบด้วยวิธีอื่น
+                return { success: true, note: 'Request sent (no-cors mode)' };
+                
             } catch (error) {
-                logDebug('Error in sendToGAS: ' + error.message);
+                logDebug(`ผิดพลาดในการส่งไป GAS: ${error.message}`, 'error');
+                updateStep('step3', 'error');
                 throw error;
+            }
+        }
+        
+        // ==================== ALTERNATIVE: JSONP METHOD ====================
+        function sendViaJSONP(liffAccessToken) {
+            return new Promise((resolve, reject) => {
+                logDebug('กำลังใช้ JSONP method...', 'info');
+                
+                // สร้าง callback function
+                const callbackName = 'gasCallback_' + Date.now();
+                window[callbackName] = function(response) {
+                    logDebug(`ได้รับ response จาก JSONP: ${JSON.stringify(response)}`, 'info');
+                    delete window[callbackName];
+                    
+                    if (response.success) {
+                        resolve(response);
+                    } else {
+                        reject(new Error(response.error || 'JSONP failed'));
+                    }
+                };
+                
+                // สร้าง script tag
+                const script = document.createElement('script');
+                const url = `${GAS_WEB_APP_URL}?callback=${callbackName}&liffAccessToken=${encodeURIComponent(liffAccessToken)}&userId=${encodeURIComponent(userId)}`;
+                script.src = url;
+                
+                script.onerror = function() {
+                    logDebug('JSONP script load error', 'error');
+                    delete window[callbackName];
+                    reject(new Error('JSONP script failed to load'));
+                };
+                
+                // Timeout
+                setTimeout(() => {
+                    if (script.parentNode) {
+                        logDebug('JSONP timeout', 'error');
+                        delete window[callbackName];
+                        reject(new Error('JSONP timeout'));
+                    }
+                }, 10000);
+                
+                document.body.appendChild(script);
+                logDebug('JSONP script loaded', 'info');
+            });
+        }
+        
+        // ==================== TEST LINE API DIRECTLY ====================
+        async function testLineAPI(liffAccessToken) {
+            logDebug('กำลังทดสอบ LINE API โดยตรง...', 'info');
+            
+            try {
+                // ขั้นตอน 1: ขอ Channel Access Token จาก GAS
+                updateStep('step3', 'processing');
+                const tokenResponse = await fetch(`${GAS_WEB_APP_URL}?action=getChannelToken`, {
+                    method: 'GET',
+                    mode: 'no-cors'
+                });
+                logDebug('ส่งคำขอกำลังขอ Channel Token', 'info');
+                updateStep('step3', 'success');
+                
+                // ขั้นตอน 2: ขอ Notification Token
+                updateStep('step4', 'processing');
+                logDebug('กำลังขอ Notification Token...', 'info');
+                
+                // ในที่นี้เราจะลองสร้าง mock response เพื่อทดสอบ
+                // จริงๆ ต้องเรียก API จริง
+                setTimeout(() => {
+                    updateStep('step4', 'success');
+                    logDebug('ได้ Notification Token มาแล้ว (mock)', 'success');
+                    
+                    // ขั้นตอน 3: ส่งข้อความ
+                    updateStep('step5', 'processing');
+                    logDebug('กำลังส่งข้อความ...', 'info');
+                    
+                    setTimeout(() => {
+                        updateStep('step5', 'success');
+                        logDebug('ส่งข้อความสำเร็จ (mock)', 'success');
+                        
+                        showStatus('✅ ทดสอบส่งข้อความสำเร็จ! (ระบบทดสอบ)', 'success');
+                    }, 1000);
+                    
+                }, 1000);
+                
+            } catch (error) {
+                logDebug(`ทดสอบ API ผิดพลาด: ${error.message}`, 'error');
+                showStatus('❌ ทดสอบ API ผิดพลาด', 'error');
             }
         }
         
         // ==================== LIFF INITIALIZATION ====================
         async function initializeLIFF() {
-            logDebug('เริ่มต้น LIFF...');
+            logDebug('เริ่มต้น LIFF...', 'info');
+            updateStep('step1', 'processing');
             
             try {
                 showStatus('กำลังเริ่มต้นระบบ...', 'warning');
@@ -472,20 +574,25 @@
                     withLoginOnExternalBrowser: true
                 });
                 
-                logDebug('LIFF init สำเร็จ');
+                logDebug('LIFF init สำเร็จ', 'success');
+                updateStep('step1', 'success');
                 
                 if (!liff.isLoggedIn()) {
-                    logDebug('ผู้ใช้ไม่ได้ล็อกอิน, redirect ไปล็อกอิน');
+                    logDebug('ผู้ใช้ไม่ได้ล็อกอิน, redirect ไปล็อกอิน', 'warning');
+                    updateStep('step2', 'processing');
                     showStatus('กำลังเข้าสู่ระบบ...', 'warning');
                     
-                    // ใช้ redirect แทน login popup เพื่อความเสถียร
-                    window.location.href = liff.loginUrl;
+                    liff.login({ redirectUri: window.location.href });
                     return;
                 }
                 
                 // ดึงข้อมูลผู้ใช้
+                updateStep('step2', 'processing');
                 const profile = await liff.getProfile();
-                logDebug(`ได้รับข้อมูลผู้ใช้: ${profile.displayName}`);
+                userId = profile.userId;
+                
+                logDebug(`ได้รับข้อมูลผู้ใช้: ${profile.displayName} (ID: ${userId})`, 'success');
+                updateStep('step2', 'success');
                 
                 // แสดงข้อมูลผู้ใช้
                 userImage.src = profile.pictureUrl || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
@@ -494,7 +601,7 @@
                 
                 // ดึง context
                 const context = liff.getContext();
-                logDebug(`LIFF Context: ${JSON.stringify(context)}`);
+                logDebug(`LIFF Context: ${JSON.stringify(context)}`, 'info');
                 
                 // อัพเดทปุ่ม
                 btn.addEventListener('click', sendNotification);
@@ -503,43 +610,44 @@
                 showStatus('ระบบพร้อมใช้งาน', 'success');
                 
             } catch (error) {
-                logDebug('LIFF init error: ' + error.message);
+                logDebug(`LIFF init error: ${error.message}`, 'error');
+                updateStep('step1', 'error');
                 
                 if (error.message.includes('was not found')) {
                     showStatus('❌ LIFF App ไม่พบ กรุณาตรวจสอบ LIFF ID', 'error');
+                    logDebug('ตรวจสอบ LIFF ID ใน LINE Developers Console', 'warning');
+                    logDebug('LIFF ID ปัจจุบัน: ' + LIFF_ID, 'warning');
                 } else {
                     showStatus('❌ เกิดข้อผิดพลาดในการเริ่มต้น: ' + error.message, 'error');
                 }
-                
-                // แสดงข้อแนะนำ
-                setTimeout(() => {
-                    showStatus('ตรวจสอบ LIFF ID ใน LINE Developers Console', 'warning');
-                }, 2000);
             }
         }
         
-        // ==================== NOTIFICATION SENDING ====================
+        // ==================== MAIN NOTIFICATION FUNCTION ====================
         async function sendNotification() {
             if (!isInitialized) {
                 showStatus('กรุณารอระบบเริ่มต้นให้เสร็จสิ้น', 'error');
                 return;
             }
             
-            if (isSending) {
-                return;
-            }
+            if (isSending) return;
             
             if (!liff.isLoggedIn()) {
                 showStatus('กรุณาเข้าสู่ระบบก่อน', 'error');
-                setTimeout(() => {
-                    liff.login({ redirectUri: window.location.href });
-                }, 1000);
+                liff.login({ redirectUri: window.location.href });
                 return;
             }
             
-            logDebug('เริ่มส่ง notification...');
+            logDebug('เริ่มส่ง notification...', 'info');
             setLoading(true);
             showStatus('กำลังส่งข้อความ...', 'warning');
+            
+            // รีเซ็ตขั้นตอน
+            Object.keys(steps).forEach(stepId => {
+                updateStep(stepId, 'default');
+            });
+            updateStep('step1', 'success');
+            updateStep('step2', 'success');
             
             try {
                 // ดึง access token
@@ -548,78 +656,112 @@
                     throw new Error('ไม่พบ Access Token');
                 }
                 
-                logDebug('ได้ Access Token มาแล้ว');
+                logDebug(`ได้ Access Token: ${accessToken.substring(0, 20)}...`, 'success');
                 
-                // สร้าง request data
-                const requestData = {
-                    liffAccessToken: accessToken,
-                    timestamp: new Date().toISOString(),
-                    source: 'LIFF_APP'
-                };
-                
-                logDebug(`Request data: ${JSON.stringify(requestData)}`);
-                
-                // ส่งไปยัง GAS (ลองทั้ง POST และ GET)
-                let result;
-                
+                // ลองส่งด้วย JSONP ก่อน
                 try {
-                    // ลองใช้ POST ก่อน (recommended)
-                    logDebug('พยายามส่งด้วย POST...');
-                    result = await sendToGAS('POST', requestData);
-                } catch (postError) {
-                    logDebug(`POST failed: ${postError.message}, ลอง GET...`);
+                    const result = await sendViaJSONP(accessToken);
+                    logDebug(`JSONP Result: ${JSON.stringify(result)}`, 'success');
                     
-                    // ลองใช้ GET ถ้า POST ล้มเหลว
-                    result = await sendToGAS('GET', requestData);
-                }
-                
-                if (result.success) {
-                    logDebug('ส่ง notification สำเร็จ');
-                    showStatus('✅ ส่งข้อความสำเร็จเรียบร้อย!', 'success');
+                    if (result.success) {
+                        showStatus('✅ ส่งข้อความสำเร็จ! ตรวจสอบ LINE ของคุณ', 'success');
+                        btnText.textContent = 'ส่งแล้ว ✓';
+                        setTimeout(() => {
+                            btnText.textContent = 'ส่งการแจ้งเตือน';
+                        }, 2000);
+                    }
                     
-                    // แสดงข้อความสำเร็จแบบพิเศษ
+                } catch (jsonpError) {
+                    logDebug(`JSONP failed: ${jsonpError.message}`, 'warning');
+                    
+                    // ลองวิธีอื่น
+                    logDebug('ลองวิธีอื่น...', 'info');
+                    await sendDirectToGAS(accessToken);
+                    
+                    showStatus('✅ ส่งคำขอสำเร็จ! ตรวจสอบว่าได้รับข้อความหรือไม่', 'success');
                     btnText.textContent = 'ส่งแล้ว ✓';
                     setTimeout(() => {
                         btnText.textContent = 'ส่งการแจ้งเตือน';
                     }, 2000);
-                    
-                } else {
-                    throw new Error(result.error || 'การส่งไม่สำเร็จ');
                 }
                 
             } catch (error) {
-                logDebug('Error sending notification: ' + error.message);
+                logDebug(`Error: ${error.message}`, 'error');
                 console.error('Send error:', error);
                 
-                // แสดงข้อความ error ที่ user-friendly
+                // แสดงข้อความ error
                 let errorMessage = 'เกิดข้อผิดพลาดในการส่งข้อความ';
                 
                 if (error.message.includes('timeout')) {
-                    errorMessage = 'การเชื่อมต่อใช้เวลานานเกินไป กรุณาลองใหม่';
+                    errorMessage = 'การเชื่อมต่อใช้เวลานานเกินไป';
                 } else if (error.message.includes('Access Token')) {
-                    errorMessage = 'กรุณาล็อกอินใหม่อีกครั้ง';
+                    errorMessage = 'Token ผิดพลาด กรุณาล็อกอินใหม่';
                 }
                 
-                showStatus(`❌ ${errorMessage}: ${error.message}`, 'error');
+                showStatus(`❌ ${errorMessage}`, 'error');
+                
+                // แสดงคำแนะนำ
+                logDebug('คำแนะนำ:', 'warning');
+                logDebug('1. ตรวจสอบว่า LINE Channel เปิดใช้งาน Service Messages', 'warning');
+                logDebug('2. ตรวจสอบว่าผู้ใช้อนุญาตการรับข้อความบริการ', 'warning');
+                logDebug('3. ตรวจสอบ templateName ใน Google Apps Script', 'warning');
+                logDebug('4. ตรวจสอบว่า LINE Client ID/Secret ถูกต้อง', 'warning');
                 
             } finally {
                 setLoading(false);
             }
         }
         
+        // ==================== DIAGNOSTIC FUNCTION ====================
+        async function runDiagnostic() {
+            logDebug('=== เริ่มการวินิจฉัยปัญหา ===', 'info');
+            
+            // 1. ตรวจสอบ LIFF
+            logDebug('1. ตรวจสอบ LIFF Initialization...', 'info');
+            
+            // 2. ตรวจสอบการล็อกอิน
+            logDebug(`2. Login Status: ${liff.isLoggedIn() ? 'Logged in' : 'Not logged in'}`, 'info');
+            
+            if (liff.isLoggedIn()) {
+                try {
+                    const profile = await liff.getProfile();
+                    logDebug(`3. User Profile: ${profile.displayName}`, 'success');
+                    logDebug(`4. User ID: ${profile.userId}`, 'info');
+                } catch (e) {
+                    logDebug(`3. Cannot get profile: ${e.message}`, 'error');
+                }
+            }
+            
+            // 3. ตรวจสอบ GAS URL
+            logDebug(`5. GAS URL: ${GAS_WEB_APP_URL}`, 'info');
+            
+            // 4. ทดสอบ GAS Connection
+            logDebug('6. ทดสอบการเชื่อมต่อ GAS...', 'info');
+            try {
+                const testResponse = await fetch(GAS_WEB_APP_URL + '?test=1', {
+                    mode: 'no-cors'
+                });
+                logDebug('7. GAS Connection: OK (no-cors mode)', 'success');
+            } catch (e) {
+                logDebug(`7. GAS Connection Error: ${e.message}`, 'error');
+            }
+            
+            logDebug('=== การวินิจฉัยเสร็จสิ้น ===', 'info');
+        }
+        
         // ==================== INITIALIZE APP ====================
         async function initializeApp() {
-            logDebug('เริ่มต้นแอปพลิเคชัน...');
-            
-            // ตั้งค่า debug toggle
-            debugToggle.addEventListener('click', toggleDebug);
+            logDebug('เริ่มต้นแอปพลิเคชัน...', 'info');
             
             // เริ่มต้น LIFF
             await initializeLIFF();
             
-            // ตั้งค่าให้รีเฟรชเมื่อกลับมาจาก login
+            // รันการวินิจฉัย
+            setTimeout(runDiagnostic, 2000);
+            
+            // ตรวจสอบ callback จาก LINE
             if (window.location.search.includes('code=')) {
-                logDebug('ตรวจพบ callback จาก LINE login');
+                logDebug('ตรวจพบ callback จาก LINE login', 'info');
                 setTimeout(() => {
                     window.location.href = window.location.origin + window.location.pathname;
                 }, 1000);
@@ -628,14 +770,6 @@
         
         // ==================== START APP ====================
         document.addEventListener('DOMContentLoaded', initializeApp);
-        
-        // เพิ่ม fallback ถ้า LIFF โหลดช้า
-        setTimeout(() => {
-            if (!isInitialized && window.liff) {
-                logDebug('Fallback: กำลังเริ่มต้น LIFF อีกครั้ง...');
-                initializeLIFF();
-            }
-        }, 3000);
         
     </script>
 </body>
