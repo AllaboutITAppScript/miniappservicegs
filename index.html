@@ -291,11 +291,22 @@
         }
 
         .step-indicator {
-            margin: 30px 0;
+            margin: 20px 0 0 0;
+            padding: 0;
+            background: transparent;
+            border-radius: var(--radius-lg);
+            border: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-normal);
+        }
+
+        .step-indicator.show {
+            max-height: 500px;
             padding: 20px;
             background: var(--bg-tertiary);
-            border-radius: var(--radius-lg);
             border: 1px solid var(--border-light);
+            margin: 20px 0;
         }
 
         .step {
@@ -370,18 +381,27 @@
         }
 
         .debug-info {
-            margin-top: 20px;
-            padding: 20px;
-            background: var(--bg-tertiary);
+            margin-top: 0;
+            padding: 0;
+            background: transparent;
             border-radius: var(--radius-lg);
             font-size: 12px;
             color: var(--text-tertiary);
             text-align: left;
             display: block;
-            max-height: 300px;
+            max-height: 0;
             overflow-y: auto;
             font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            border: none;
+            transition: max-height var(--transition-normal);
+        }
+
+        .debug-info.show {
+            max-height: 300px;
+            padding: 20px;
+            background: var(--bg-tertiary);
             border: 1px solid var(--border-color);
+            margin-top: 20px;
         }
 
         .debug-info::-webkit-scrollbar {
@@ -433,21 +453,29 @@
             overflow-y: auto;
         }
 
-        .notification-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 10px;
-            height: 10px;
-            background: var(--error-color);
-            border-radius: var(--radius-full);
-            animation: pulse 2s infinite;
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
+        .control-btn {
+            padding: 8px 16px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .control-btn:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--primary-color);
         }
 
         .logo {
@@ -476,14 +504,17 @@
             .btn {
                 padding: 16px;
             }
+            
+            .control-buttons {
+                flex-direction: column;
+                gap: 8px;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="notification-badge"></div>
-        
         <div class="header">
             <div class="icon-wrapper">
                 <svg viewBox="0 0 24 24">
@@ -532,10 +563,15 @@
             </div>
         </div>
 
+        <div class="control-buttons">
+            <button id="toggleProgressBtn" class="control-btn">แสดง Progress</button>
+            <button id="toggleDebugBtn" class="control-btn">แสดง Debug</button>
+        </div>
+
         <div class="debug-info" id="debugInfo">
             <div class="debug-header">
                 <div class="debug-title">Debug Log:</div>
-                <div class="debug-toggle" id="debugToggle">ซ่อน/แสดง</div>
+                <div class="debug-toggle" id="debugToggle">ปิด Debug</div>
             </div>
             <div class="debug-content" id="debugContent"></div>
         </div>
@@ -559,6 +595,11 @@
         const userName = document.getElementById('userName');
         const debugContent = document.getElementById('debugContent');
         const debugToggle = document.getElementById('debugToggle');
+        const toggleProgressBtn = document.getElementById('toggleProgressBtn');
+        const toggleDebugBtn = document.getElementById('toggleDebugBtn');
+        const stepIndicator = document.getElementById('stepIndicator');
+        const debugInfo = document.getElementById('debugInfo');
+        
         const steps = {
             step1: document.getElementById('step1'),
             step2: document.getElementById('step2'),
@@ -571,6 +612,8 @@
         let isInitialized = false;
         let isSending = false;
         let userId = '';
+        let isProgressVisible = false;
+        let isDebugVisible = false;
         
         // ==================== LOGGING FUNCTIONS ====================
         function logDebug(message, type = 'info') {
@@ -666,7 +709,31 @@
             statusContainer.classList.remove('show');
         }
         
-        // ==================== DIRECT GAS CALL ====================
+        function toggleProgress() {
+            isProgressVisible = !isProgressVisible;
+            if (isProgressVisible) {
+                stepIndicator.classList.add('show');
+                toggleProgressBtn.textContent = 'ซ่อน Progress';
+            } else {
+                stepIndicator.classList.remove('show');
+                toggleProgressBtn.textContent = 'แสดง Progress';
+            }
+        }
+        
+        function toggleDebug() {
+            isDebugVisible = !isDebugVisible;
+            if (isDebugVisible) {
+                debugInfo.classList.add('show');
+                debugToggle.textContent = 'ปิด Debug';
+                toggleDebugBtn.textContent = 'ซ่อน Debug';
+            } else {
+                debugInfo.classList.remove('show');
+                debugToggle.textContent = 'เปิด Debug';
+                toggleDebugBtn.textContent = 'แสดง Debug';
+            }
+        }
+        
+        // ==================== GAS FUNCTIONS ====================
         async function sendDirectToGAS(liffAccessToken) {
             logDebug('กำลังส่งข้อมูลไปยัง GAS โดยตรง...', 'info');
             updateStep('step3', 'processing');
@@ -697,7 +764,6 @@
             }
         }
         
-        // ==================== JSONP METHOD ====================
         function sendViaJSONP(liffAccessToken) {
             return new Promise((resolve, reject) => {
                 logDebug('กำลังใช้ JSONP method...', 'info');
@@ -727,7 +793,7 @@
                 setTimeout(() => {
                     if (script.parentNode) {
                         logDebug('JSONP timeout', 'error');
-                        delete window[callbackName];
+                        delete window[callbackName);
                         reject(new Error('JSONP timeout'));
                     }
                 }, 10000);
@@ -735,44 +801,6 @@
                 document.body.appendChild(script);
                 logDebug('JSONP script loaded', 'info');
             });
-        }
-        
-        // ==================== TEST LINE API DIRECTLY ====================
-        async function testLineAPI(liffAccessToken) {
-            logDebug('กำลังทดสอบ LINE API โดยตรง...', 'info');
-            
-            try {
-                updateStep('step3', 'processing');
-                const tokenResponse = await fetch(`${GAS_WEB_APP_URL}?action=getChannelToken`, {
-                    method: 'GET',
-                    mode: 'no-cors'
-                });
-                logDebug('ส่งคำขอกำลังขอ Channel Token', 'info');
-                updateStep('step3', 'success');
-                
-                updateStep('step4', 'processing');
-                logDebug('กำลังขอ Notification Token...', 'info');
-                
-                setTimeout(() => {
-                    updateStep('step4', 'success');
-                    logDebug('ได้ Notification Token มาแล้ว (mock)', 'success');
-                    
-                    updateStep('step5', 'processing');
-                    logDebug('กำลังส่งข้อความ...', 'info');
-                    
-                    setTimeout(() => {
-                        updateStep('step5', 'success');
-                        logDebug('ส่งข้อความสำเร็จ (mock)', 'success');
-                        
-                        showStatus('✅ ทดสอบส่งข้อความสำเร็จ! (ระบบทดสอบ)', 'success');
-                    }, 1000);
-                    
-                }, 1000);
-                
-            } catch (error) {
-                logDebug(`ทดสอบ API ผิดพลาด: ${error.message}`, 'error');
-                showStatus('❌ ทดสอบ API ผิดพลาด', 'error');
-            }
         }
         
         // ==================== LIFF INITIALIZATION ====================
@@ -852,11 +880,17 @@
             setLoading(true);
             showStatus('กำลังส่งข้อความ...', 'warning');
             
+            // อัพเดทขั้นตอน
             Object.keys(steps).forEach(stepId => {
                 updateStep(stepId, 'default');
             });
             updateStep('step1', 'success');
             updateStep('step2', 'success');
+            
+            // แสดง progress ถ้ายังไม่ได้แสดง
+            if (!isProgressVisible) {
+                toggleProgress();
+            }
             
             try {
                 const accessToken = liff.getAccessToken();
@@ -871,6 +905,9 @@
                     logDebug(`JSONP Result: ${JSON.stringify(result)}`, 'success');
                     
                     if (result.success) {
+                        updateStep('step3', 'success');
+                        updateStep('step4', 'success');
+                        updateStep('step5', 'success');
                         showStatus('✅ ส่งข้อความสำเร็จ! ตรวจสอบ LINE ของคุณ', 'success');
                         btnText.textContent = 'ส่งแล้ว ✓';
                         setTimeout(() => {
@@ -883,6 +920,10 @@
                     
                     logDebug('ลองวิธีอื่น...', 'info');
                     await sendDirectToGAS(accessToken);
+                    
+                    updateStep('step3', 'success');
+                    updateStep('step4', 'success');
+                    updateStep('step5', 'success');
                     
                     showStatus('✅ ส่งคำขอสำเร็จ! ตรวจสอบว่าได้รับข้อความหรือไม่', 'success');
                     btnText.textContent = 'ส่งแล้ว ✓';
@@ -905,48 +946,9 @@
                 
                 showStatus(`❌ ${errorMessage}`, 'error');
                 
-                logDebug('คำแนะนำ:', 'warning');
-                logDebug('1. ตรวจสอบว่า LINE Channel เปิดใช้งาน Service Messages', 'warning');
-                logDebug('2. ตรวจสอบว่าผู้ใช้อนุญาตการรับข้อความบริการ', 'warning');
-                logDebug('3. ตรวจสอบ templateName ใน Google Apps Script', 'warning');
-                logDebug('4. ตรวจสอบว่า LINE Client ID/Secret ถูกต้อง', 'warning');
-                
             } finally {
                 setLoading(false);
             }
-        }
-        
-        // ==================== DIAGNOSTIC FUNCTION ====================
-        async function runDiagnostic() {
-            logDebug('=== เริ่มการวินิจฉัยปัญหา ===', 'info');
-            
-            logDebug('1. ตรวจสอบ LIFF Initialization...', 'info');
-            
-            logDebug(`2. Login Status: ${liff.isLoggedIn() ? 'Logged in' : 'Not logged in'}`, 'info');
-            
-            if (liff.isLoggedIn()) {
-                try {
-                    const profile = await liff.getProfile();
-                    logDebug(`3. User Profile: ${profile.displayName}`, 'success');
-                    logDebug(`4. User ID: ${profile.userId}`, 'info');
-                } catch (e) {
-                    logDebug(`3. Cannot get profile: ${e.message}`, 'error');
-                }
-            }
-            
-            logDebug(`5. GAS URL: ${GAS_WEB_APP_URL}`, 'info');
-            
-            logDebug('6. ทดสอบการเชื่อมต่อ GAS...', 'info');
-            try {
-                const testResponse = await fetch(GAS_WEB_APP_URL + '?test=1', {
-                    mode: 'no-cors'
-                });
-                logDebug('7. GAS Connection: OK (no-cors mode)', 'success');
-            } catch (e) {
-                logDebug(`7. GAS Connection Error: ${e.message}`, 'error');
-            }
-            
-            logDebug('=== การวินิจฉัยเสร็จสิ้น ===', 'info');
         }
         
         // ==================== INITIALIZE APP ====================
@@ -955,25 +957,18 @@
             
             await initializeLIFF();
             
-            setTimeout(runDiagnostic, 2000);
+            // ตั้งค่า event listeners สำหรับปุ่มควบคุม
+            toggleProgressBtn.addEventListener('click', toggleProgress);
+            toggleDebugBtn.addEventListener('click', toggleDebug);
+            debugToggle.addEventListener('click', toggleDebug);
             
+            // ตรวจสอบ callback จาก LINE
             if (window.location.search.includes('code=')) {
                 logDebug('ตรวจพบ callback จาก LINE login', 'info');
                 setTimeout(() => {
                     window.location.href = window.location.origin + window.location.pathname;
                 }, 1000);
             }
-            
-            debugToggle.addEventListener('click', () => {
-                const content = debugContent.parentElement;
-                if (content.style.maxHeight && content.style.maxHeight !== '0px') {
-                    content.style.maxHeight = '0px';
-                    content.style.overflow = 'hidden';
-                } else {
-                    content.style.maxHeight = '200px';
-                    content.style.overflow = 'auto';
-                }
-            });
         }
         
         // ==================== START APP ====================
