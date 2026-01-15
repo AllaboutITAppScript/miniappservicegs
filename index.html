@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Messages</title>
+    <link id="favicon" rel="icon" href="https://developers.line.biz/images/icons/products/light/mini.svg">
+    <link id="apple-touch-icon" rel="apple-touch-icon" href="https://developers.line.biz/images/icons/products/light/mini.svg">
+    <meta name="description" content="service messages for MINI App" />
+    <meta name="author" content="iton5" />
+    <meta property="og:title" content="service messages-iton5-thailand" />
+    <meta property="og:description" content="service messages for MINI App" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/128/134/134808.png" />
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #06C755; 
+            --primary-gradient: linear-gradient(135deg, #06C755 0%, #00B900 100%);
+            --background-color: #F2F5F8;
+            --card-bg: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-secondary: #888888;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --radius: 20px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-main);
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 40px 30px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .icon-wrapper {
+            width: 80px;
+            height: 80px;
+            background: #E8FAF0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .icon-wrapper svg {
+            width: 40px;
+            height: 40px;
+            fill: var(--primary-color);
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary-gradient);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Kanit', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(6, 199, 85, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+       
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        
+        #statusMessage {
+            margin-top: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .success { color: var(--primary-color); }
+        .error { color: #FF4B4B; }
+
+       
+        #userProfile {
+            display: none;
+            margin-bottom: 20px;
+        }
+        #userProfile img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="icon-wrapper">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+            </svg>
+        </div>
+
+        <div id="userProfile">
+            <img id="userImage" src="" alt="User">
+            <p id="userName" class="text-xs text-gray-500">ยินดีต้อนรับ</p>
+        </div>
+
+        <h1>แจ้งเตือนการจอง</h1>
+        <p>กดปุ่มด้านล่างเพื่อส่ง Service Message <br>ยืนยันรายละเอียดการจองของคุณ</p>
+
+        <button id="sendBtn" class="btn" onclick="sendNotification()">
+            <span id="btnText">ส่งการแจ้งเตือน</span>
+            <div id="btnLoader" class="spinner"></div>
+        </button>
+
+        <div id="statusMessage"></div>
+    </div>
+
+    <script>
+        // 1. ตั้งค่า LIFF ID
+        const LIFF_ID = "2008892436-4R1TOzft
+"; // ใส่ MINI App ID ของคุณที่นี่
+        
+        // 2. ตั้งค่า Google Apps Script Web App URL
+        // หลังจาก Deploy Google Apps Script แล้ว จะได้ URL ประมาณนี้:
+        // https://script.google.com/macros/s/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzTYOO14YVHVhOT47fFjltIHwhoZ9YMrECviBApcMZCWVAxiqdEnjxda_HqUIGhw9Tv/exec";
+        
+        // 3. DOM Elements
+        const btn = document.getElementById('sendBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoader = document.getElementById('btnLoader');
+        const statusMsg = document.getElementById('statusMessage');
+
+        // 4. Initialize LIFF
+        async function main() {
+            try {
+                await liff.init({ 
+                    liffId: LIFF_ID,
+                    withLoginOnExternalBrowser: true 
+                });
+                
+                if (!liff.isLoggedIn()) {
+                    liff.login({ redirectUri: window.location.href });
+                } else {
+                    // แสดงข้อมูลผู้ใช้
+                    const profile = await liff.getProfile();
+                    document.getElementById('userImage').src = profile.pictureUrl;
+                    document.getElementById('userName').innerText = profile.displayName;
+                    document.getElementById('userProfile').style.display = 'block';
+                }
+            } catch (err) {
+                showStatus("LIFF init failed: " + err.message, false);
+            }
+        }
+
+        // 5. Run initialization
+        main();
+
+        // 6. Send Notification Function
+        async function sendNotification() {
+            if (!liff.isLoggedIn()) {
+                liff.login({ redirectUri: window.location.href });
+                return;
+            }
+
+            setLoading(true);
+            showStatus("", true); 
+
+            try {
+                // รับ Access Token จาก LIFF
+                const accessToken = liff.getAccessToken();
+
+                if(!accessToken) throw new Error("ไม่พบ Access Token");
+
+                // ส่ง request ไปยัง Google Apps Script Web App
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // จำเป็นสำหรับ Google Apps Script Web App
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ liffAccessToken: accessToken })
+                });
+
+                // สำหรับ no-cors mode เราอ่าน response จาก iframe หรือใช้วิธีอื่น
+                // หรือเปลี่ยนเป็นใช้ cors mode โดยต้องแก้ไข Google Apps Script
+                // ให้ส่ง header ที่ถูกต้อง (ดูด้านล่าง)
+                
+                // วิธีที่ 1: ใช้ no-cors (อ่าน response ผ่านอื่นๆ)
+                // วิธีที่ 2: ใช้ iframe (ดูตัวอย่างด้านล่าง)
+
+            } catch (error) {
+                console.error(error);
+                showStatus("เกิดข้อผิดพลาด: " + error.message, false);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // 7. Alternative: ใช้ iframe สำหรับการรับ response จาก GAS
+        async function sendNotificationWithIframe() {
+            if (!liff.isLoggedIn()) {
+                liff.login({ redirectUri: window.location.href });
+                return;
+            }
+
+            setLoading(true);
+            showStatus("กำลังส่งข้อความ...", true);
+
+            try {
+                const accessToken = liff.getAccessToken();
+                
+                if(!accessToken) throw new Error("ไม่พบ Access Token");
+
+                // สร้าง form และ iframe
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = GAS_WEB_APP_URL;
+                form.target = 'gasResponse';
+                
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'postData';
+                input.value = JSON.stringify({ liffAccessToken: accessToken });
+                
+                form.appendChild(input);
+                document.body.appendChild(form);
+                
+                // สร้าง iframe สำหรับรับ response
+                const iframe = document.createElement('iframe');
+                iframe.name = 'gasResponse';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                // ตั้งค่า event listener สำหรับ iframe load
+                iframe.onload = function() {
+                    try {
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        const responseText = iframeDoc.body.textContent;
+                        const data = JSON.parse(responseText);
+                        
+                        if (data.success) {
+                            showStatus("ส่งข้อความสำเร็จเรียบร้อย!", true);
+                        } else {
+                            throw new Error(data.error || "Unknown Error");
+                        }
+                    } catch (error) {
+                        showStatus("เกิดข้อผิดพลาด: " + error.message, false);
+                    } finally {
+                        setLoading(false);
+                        // ล้าง iframe และ form
+                        document.body.removeChild(iframe);
+                        document.body.removeChild(form);
+                    }
+                };
+                
+                // ส่ง form
+                form.submit();
+                
+            } catch (error) {
+                showStatus("เกิดข้อผิดพลาด: " + error.message, false);
+                setLoading(false);
+            }
+        }
+
+        // 8. Alternative: ใช้ XMLHttpRequest (รองรับ CORS ได้ดีกว่า)
+        async function sendNotificationWithXHR() {
+            if (!liff.isLoggedIn()) {
+                liff.login({ redirectUri: window.location.href });
+                return;
+            }
+
+            setLoading(true);
+            showStatus("กำลังส่งข้อความ...", true);
+
+            return new Promise((resolve, reject) => {
+                const accessToken = liff.getAccessToken();
+                
+                if(!accessToken) {
+                    reject(new Error("ไม่พบ Access Token"));
+                    return;
+                }
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', GAS_WEB_APP_URL, true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                
+                xhr.onload = function() {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.success) {
+                            showStatus("ส่งข้อความสำเร็จเรียบร้อย!", true);
+                            resolve(data);
+                        } else {
+                            throw new Error(data.error || "Unknown Error");
+                        }
+                    } catch (error) {
+                        showStatus("เกิดข้อผิดพลาด: " + error.message, false);
+                        reject(error);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    showStatus("เกิดข้อผิดพลาดในการเชื่อมต่อ", false);
+                    setLoading(false);
+                    reject(new Error("Network Error"));
+                };
+                
+                xhr.send(JSON.stringify({ liffAccessToken: accessToken }));
+            });
+        }
+
+        // 9. Helper Functions
+        function setLoading(isLoading) {
+            if (isLoading) {
+                btn.disabled = true;
+                btnText.style.display = 'none';
+                btnLoader.style.display = 'block';
+            } else {
+                btn.disabled = false;
+                btnText.style.display = 'block';
+                btnLoader.style.display = 'none';
+            }
+        }
+
+        function showStatus(message, isSuccess) {
+            statusMsg.innerText = message;
+            statusMsg.className = isSuccess ? 'success' : 'error';
+            statusMsg.style.opacity = 1;
+        }
+
+        // 10. เปลี่ยน function ที่เรียกจากปุ่ม
+        // เลือกวิธีใดวิธีหนึ่งจาก 3 วิธีด้านบน:
+        // 1. sendNotification() - ใช้ fetch (no-cors)
+        // 2. sendNotificationWithIframe() - ใช้ iframe
+        // 3. sendNotificationWithXHR() - ใช้ XMLHttpRequest
+
+        // ตัวอย่าง: ใช้ XMLHttpRequest
+        window.sendNotification = sendNotificationWithXHR;
+
+    </script>
+</body>
+</html>
