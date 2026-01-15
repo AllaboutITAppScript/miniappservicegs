@@ -793,7 +793,7 @@
                 setTimeout(() => {
                     if (script.parentNode) {
                         logDebug('JSONP timeout', 'error');
-                        delete window[callbackName);
+                        delete window[callbackName];
                         reject(new Error('JSONP timeout'));
                     }
                 }, 10000);
