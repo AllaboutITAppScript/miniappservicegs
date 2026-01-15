@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Messages</title>
+    <title>Service Messages - LINE Mini App</title>
     <link id="favicon" rel="icon" href="https://developers.line.biz/images/icons/products/light/mini.svg">
     <link id="apple-touch-icon" rel="apple-touch-icon" href="https://developers.line.biz/images/icons/products/light/mini.svg">
-    <meta name="description" content="service messages for MINI App" />
+    <meta name="description" content="Service Messages for LINE Mini App" />
     <meta name="author" content="iton5" />
-    <meta property="og:title" content="service messages-iton5-thailand" />
-    <meta property="og:description" content="service messages for MINI App" />
+    <meta property="og:title" content="Service Messages - LINE Mini App" />
+    <meta property="og:description" content="ส่งข้อความบริการผ่าน LINE Mini App" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://cdn-icons-png.flaticon.com/128/134/134808.png" />
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -17,389 +17,847 @@
     
     <style>
         :root {
-            --primary-color: #06C755; 
+            --primary-color: #06C755;
+            --primary-hover: #05B047;
             --primary-gradient: linear-gradient(135deg, #06C755 0%, #00B900 100%);
             --background-color: #F2F5F8;
             --card-bg: #FFFFFF;
             --text-main: #1A1A1A;
-            --text-secondary: #888888;
+            --text-secondary: #666666;
+            --text-light: #888888;
+            --border-color: #E0E0E0;
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            --radius: 20px;
+            --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.12);
+            --radius: 16px;
+            --radius-lg: 20px;
+            --radius-xl: 24px;
+            --radius-full: 50%;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
             font-family: 'Prompt', sans-serif;
             background-color: var(--background-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             color: var(--text-main);
-            padding: 20px;
+            line-height: 1.6;
+            padding: 16px;
+            min-height: 100vh;
         }
 
         .container {
-            width: 100%;
-            max-width: 400px;
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 40px 30px;
-            text-align: center;
-            transition: transform 0.3s ease;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 24px 20px;
         }
 
-        .icon-wrapper {
-            width: 80px;
-            height: 80px;
-            background: #E8FAF0;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
             margin: 0 auto 20px;
         }
 
-        .icon-wrapper svg {
-            width: 40px;
-            height: 40px;
-            fill: var(--primary-color);
+        .logo-circle {
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+            box-shadow: 0 8px 20px rgba(6, 199, 85, 0.25);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            fill: white;
         }
 
         h1 {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            color: var(--text-main);
+            line-height: 1.3;
         }
 
-        p {
+        .subtitle {
+            font-size: 16px;
             color: var(--text-secondary);
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 30px;
+            margin-bottom: 4px;
         }
 
-        .btn {
-            display: block;
+        .user-profile {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .user-profile:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .user-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: var(--radius-full);
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-main);
+        }
+
+        .user-status {
+            font-size: 14px;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .status-icon {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-color);
+            border-radius: var(--radius-full);
+            margin-right: 6px;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 32px 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-main);
+            text-align: center;
+        }
+
+        .card-description {
+            font-size: 15px;
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .action-button {
             width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
+            padding: 18px;
             background: var(--primary-gradient);
             color: white;
-            font-size: 16px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 17px;
             font-weight: 600;
-            font-family: 'Kanit', sans-serif;
+            font-family: 'Prompt', sans-serif;
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 15px rgba(6, 199, 85, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 6px 20px rgba(6, 199, 85, 0.25);
             position: relative;
             overflow: hidden;
         }
 
-        .btn:active {
-            transform: scale(0.98);
+        .action-button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(6, 199, 85, 0.35);
         }
 
-        .btn:disabled {
-            background: #ccc;
+        .action-button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 15px rgba(6, 199, 85, 0.2);
+        }
+
+        .action-button:disabled {
+            background: #CCCCCC;
             cursor: not-allowed;
+            transform: none;
             box-shadow: none;
         }
 
-       
+        .button-icon {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
         .spinner {
             display: none;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-full);
             border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-            margin: 0 auto;
+            animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        
-        #statusMessage {
-            margin-top: 20px;
-            font-size: 14px;
-            font-weight: 500;
+        .status-container {
+            margin-top: 24px;
+            padding: 16px;
+            border-radius: var(--radius);
+            background-color: #F8F9FA;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
             opacity: 0;
-            transition: opacity 0.5s;
+            transform: translateY(10px);
+            height: 0;
+            overflow: hidden;
         }
-        .success { color: var(--primary-color); }
-        .error { color: #FF4B4B; }
 
-       
-        #userProfile {
+        .status-container.show {
+            opacity: 1;
+            transform: translateY(0);
+            height: auto;
+            min-height: 60px;
+        }
+
+        .status-message {
+            font-size: 15px;
+            font-weight: 500;
+            text-align: center;
+            padding: 12px;
+            border-radius: var(--radius);
+        }
+
+        .status-success {
+            color: #06C755;
+            background-color: rgba(6, 199, 85, 0.1);
+            border-left: 4px solid #06C755;
+        }
+
+        .status-error {
+            color: #FF4B4B;
+            background-color: rgba(255, 75, 75, 0.1);
+            border-left: 4px solid #FF4B4B;
+        }
+
+        .status-loading {
+            color: #666666;
+            background-color: rgba(102, 102, 102, 0.1);
+            border-left: 4px solid #666666;
+        }
+
+        .details-panel {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-top: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .details-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .details-icon {
+            width: 18px;
+            height: 18px;
+            fill: var(--text-light);
+        }
+
+        .details-content {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .debug-info {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .debug-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: var(--text-light);
+            font-size: 14px;
+            user-select: none;
+        }
+
+        .debug-content {
+            margin-top: 12px;
+            padding: 12px;
+            background-color: #F8F9FA;
+            border-radius: var(--radius);
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
             display: none;
-            margin-bottom: 20px;
-        }
-        #userProfile img {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
+        .debug-content.show {
+            display: block;
+        }
+
+        .chevron {
+            transition: transform 0.3s ease;
+        }
+
+        .debug-toggle.active .chevron {
+            transform: rotate(180deg);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 24px 0;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .footer-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 16px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .main-card {
+                padding: 24px 16px;
+            }
+            
+            .action-button {
+                padding: 16px;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .user-profile {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .user-info {
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <div class="icon-wrapper">
-            <svg viewBox="0 0 24 24">
-                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
-            </svg>
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo-circle">
+                    <svg class="logo-icon" viewBox="0 0 24 24">
+                        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+                    </svg>
+                </div>
+            </div>
+            <h1>แจ้งเตือนการจอง</h1>
+            <p class="subtitle">LINE Mini App Service Messages</p>
         </div>
 
-        <div id="userProfile">
-            <img id="userImage" src="" alt="User">
-            <p id="userName" class="text-xs text-gray-500">ยินดีต้อนรับ</p>
+        <!-- User Profile -->
+        <div class="user-profile" id="userProfile" style="display: none;">
+            <img class="user-avatar" id="userImage" src="" alt="User Profile">
+            <div class="user-info">
+                <div class="user-name" id="userName"></div>
+                <div class="user-status">
+                    <span class="status-icon"></span>
+                    <span id="userStatus">พร้อมส่งข้อความ</span>
+                </div>
+            </div>
         </div>
 
-        <h1>แจ้งเตือนการจอง</h1>
-        <p>กดปุ่มด้านล่างเพื่อส่ง Service Message <br>ยืนยันรายละเอียดการจองของคุณ</p>
+        <!-- Main Card -->
+        <div class="main-card">
+            <h2 class="card-title">ส่งการแจ้งเตือน</h2>
+            <p class="card-description">
+                กดปุ่มด้านล่างเพื่อส่ง Service Message<br>
+                ยืนยันรายละเอียดการจองของคุณ
+            </p>
 
-        <button id="sendBtn" class="btn" onclick="sendNotification()">
-            <span id="btnText">ส่งการแจ้งเตือน</span>
-            <div id="btnLoader" class="spinner"></div>
-        </button>
+            <button class="action-button" id="sendBtn" onclick="sendNotification()">
+                <svg class="button-icon" viewBox="0 0 24 24">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+                <span id="btnText">ส่งการแจ้งเตือน</span>
+                <div class="spinner" id="btnLoader"></div>
+            </button>
 
-        <div id="statusMessage"></div>
+            <!-- Status Message -->
+            <div class="status-container" id="statusContainer">
+                <div class="status-message" id="statusMessage"></div>
+            </div>
+        </div>
+
+        <!-- Details Panel -->
+        <div class="details-panel">
+            <div class="details-title">
+                <svg class="details-icon" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+                ข้อมูลการใช้งาน
+            </div>
+            <div class="details-content">
+                <p>• บริการส่งข้อความผ่าน LINE Service Messages</p>
+                <p>• ใช้สำหรับยืนยันการจองหรือแจ้งเตือนสำคัญ</p>
+                <p>• ต้องมีการล็อกอินผ่าน LINE ก่อนใช้งาน</p>
+            </div>
+            
+            <div class="debug-info">
+                <div class="debug-toggle" onclick="toggleDebug()">
+                    <span>ข้อมูล Debug</span>
+                    <svg class="chevron" width="16" height="16" viewBox="0 0 24 24">
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+                    </svg>
+                </div>
+                <div class="debug-content" id="debugContent"></div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>© 2024 LINE Mini App Service</p>
+            <div class="footer-links">
+                <a href="https://developers.line.biz/th/" class="footer-link" target="_blank">LINE Developers</a>
+                <a href="https://line.me/th/" class="footer-link" target="_blank">LINE Official</a>
+                <a href="#" class="footer-link" onclick="showHelp()">วิธีใช้งาน</a>
+            </div>
+        </div>
     </div>
 
     <script>
-        // 1. ตั้งค่า LIFF ID
-        const LIFF_ID = "2008892436-4R1TOzft"; // ใส่ MINI App ID ของคุณที่นี่
-        
-        // 2. ตั้งค่า Google Apps Script Web App URL
-        // หลังจาก Deploy Google Apps Script แล้ว จะได้ URL ประมาณนี้:
-        // https://script.google.com/macros/s/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec
+        // ========== CONFIGURATION ==========
+        const LIFF_ID = "2005634758-NaWR4bKr"; // เปลี่ยนเป็น LIFF ID ของคุณ
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzTYOO14YVHVhOT47fFjltIHwhoZ9YMrECviBApcMZCWVAxiqdEnjxda_HqUIGhw9Tv/exec";
         
-        // 3. DOM Elements
-        const btn = document.getElementById('sendBtn');
-        const btnText = document.getElementById('btnText');
-        const btnLoader = document.getElementById('btnLoader');
-        const statusMsg = document.getElementById('statusMessage');
-
-        // 4. Initialize LIFF
-        async function main() {
+        // ========== STATE MANAGEMENT ==========
+        let isInitialized = false;
+        let userProfile = null;
+        let debugMode = false;
+        
+        // ========== DOM ELEMENTS ==========
+        const elements = {
+            userProfile: document.getElementById('userProfile'),
+            userImage: document.getElementById('userImage'),
+            userName: document.getElementById('userName'),
+            userStatus: document.getElementById('userStatus'),
+            sendBtn: document.getElementById('sendBtn'),
+            btnText: document.getElementById('btnText'),
+            btnLoader: document.getElementById('btnLoader'),
+            statusContainer: document.getElementById('statusContainer'),
+            statusMessage: document.getElementById('statusMessage'),
+            debugContent: document.getElementById('debugContent'),
+            debugToggle: document.querySelector('.debug-toggle')
+        };
+        
+        // ========== INITIALIZATION ==========
+        async function initializeApp() {
             try {
-                await liff.init({ 
+                showDebug("เริ่มต้นแอปพลิเคชัน...");
+                
+                // Initialize LIFF
+                await liff.init({
                     liffId: LIFF_ID,
-                    withLoginOnExternalBrowser: true 
+                    withLoginOnExternalBrowser: true
                 });
                 
+                showDebug("LIFF เริ่มต้นสำเร็จ");
+                
+                // Check login status
                 if (!liff.isLoggedIn()) {
+                    showDebug("ยังไม่ได้ล็อกอิน, กำลังเข้าสู่ระบบ...");
                     liff.login({ redirectUri: window.location.href });
-                } else {
-                    // แสดงข้อมูลผู้ใช้
-                    const profile = await liff.getProfile();
-                    document.getElementById('userImage').src = profile.pictureUrl;
-                    document.getElementById('userName').innerText = profile.displayName;
-                    document.getElementById('userProfile').style.display = 'block';
+                    return;
                 }
-            } catch (err) {
-                showStatus("LIFF init failed: " + err.message, false);
+                
+                // Get user profile
+                userProfile = await liff.getProfile();
+                showDebug("ได้รับข้อมูลโปรไฟล์ผู้ใช้");
+                
+                // Update UI with user info
+                updateUserProfile(userProfile);
+                
+                // Check context
+                const context = liff.getContext();
+                showDebug(`Context: ${JSON.stringify(context)}`);
+                
+                isInitialized = true;
+                showStatus("พร้อมใช้งาน", true, false);
+                
+            } catch (error) {
+                console.error("Initialization error:", error);
+                showDebug(`ข้อผิดพลาดในการเริ่มต้น: ${error.message}`);
+                showStatus(`ข้อผิดพลาด: ${error.message}`, false);
             }
         }
-
-        // 5. Run initialization
-        main();
-
-        // 6. Send Notification Function
+        
+        // ========== USER PROFILE ==========
+        function updateUserProfile(profile) {
+            elements.userImage.src = profile.pictureUrl || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+            elements.userName.textContent = profile.displayName;
+            elements.userStatus.textContent = "พร้อมส่งข้อความ";
+            elements.userProfile.style.display = 'flex';
+            
+            showDebug(`ผู้ใช้: ${profile.displayName}`);
+            showDebug(`User ID: ${profile.userId}`);
+        }
+        
+        // ========== NOTIFICATION SENDING ==========
         async function sendNotification() {
+            if (!isInitialized) {
+                showStatus("กรุณารอสักครู่...", false);
+                return;
+            }
+            
+            // Check if user is logged in
             if (!liff.isLoggedIn()) {
+                showDebug("ผู้ใช้ไม่ได้ล็อกอิน, กำลังเข้าสู่ระบบ...");
                 liff.login({ redirectUri: window.location.href });
                 return;
             }
-
+            
+            // Start loading state
             setLoading(true);
-            showStatus("", true); 
-
+            showStatus("กำลังส่งข้อความ...", true, true);
+            
             try {
-                // รับ Access Token จาก LIFF
+                // Get access token
                 const accessToken = liff.getAccessToken();
-
-                if(!accessToken) throw new Error("ไม่พบ Access Token");
-
-                // ส่ง request ไปยัง Google Apps Script Web App
-                const response = await fetch(GAS_WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', // จำเป็นสำหรับ Google Apps Script Web App
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ liffAccessToken: accessToken })
-                });
-
-                // สำหรับ no-cors mode เราอ่าน response จาก iframe หรือใช้วิธีอื่น
-                // หรือเปลี่ยนเป็นใช้ cors mode โดยต้องแก้ไข Google Apps Script
-                // ให้ส่ง header ที่ถูกต้อง (ดูด้านล่าง)
+                showDebug(`Access Token: ${accessToken ? 'ได้รับแล้ว' : 'ไม่พบ'}`);
                 
-                // วิธีที่ 1: ใช้ no-cors (อ่าน response ผ่านอื่นๆ)
-                // วิธีที่ 2: ใช้ iframe (ดูตัวอย่างด้านล่าง)
-
+                if (!accessToken) {
+                    throw new Error("ไม่พบ Access Token");
+                }
+                
+                // Prepare request data
+                const requestData = {
+                    liffAccessToken: accessToken,
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent
+                };
+                
+                showDebug(`ข้อมูลคำขอ: ${JSON.stringify(requestData, null, 2)}`);
+                
+                // Method 1: Try using Form submission (most reliable for GAS)
+                const result = await sendViaForm(requestData);
+                
+                if (result.success) {
+                    showDebug(`ผลลัพธ์: ${JSON.stringify(result.result, null, 2)}`);
+                    showStatus("ส่งข้อความสำเร็จเรียบร้อย! ✅", true);
+                    
+                    // Optional: Show success animation
+                    animateSuccess();
+                    
+                } else {
+                    throw new Error(result.error || "การส่งไม่สำเร็จ");
+                }
+                
             } catch (error) {
-                console.error(error);
-                showStatus("เกิดข้อผิดพลาด: " + error.message, false);
+                console.error("Send error:", error);
+                showDebug(`ข้อผิดพลาด: ${error.message}`);
+                showStatus(`ข้อผิดพลาด: ${error.message}`, false);
             } finally {
                 setLoading(false);
             }
         }
-
-        // 7. Alternative: ใช้ iframe สำหรับการรับ response จาก GAS
-        async function sendNotificationWithIframe() {
-            if (!liff.isLoggedIn()) {
-                liff.login({ redirectUri: window.location.href });
-                return;
-            }
-
-            setLoading(true);
-            showStatus("กำลังส่งข้อความ...", true);
-
-            try {
-                const accessToken = liff.getAccessToken();
+        
+        // ========== COMMUNICATION METHODS ==========
+        async function sendViaForm(data) {
+            return new Promise((resolve, reject) => {
+                showDebug("กำลังใช้วิธี Form Submission...");
                 
-                if(!accessToken) throw new Error("ไม่พบ Access Token");
-
-                // สร้าง form และ iframe
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = GAS_WEB_APP_URL;
-                form.target = 'gasResponse';
+                // Create a unique ID for this request
+                const requestId = 'req_' + Date.now();
                 
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'postData';
-                input.value = JSON.stringify({ liffAccessToken: accessToken });
-                
-                form.appendChild(input);
-                document.body.appendChild(form);
-                
-                // สร้าง iframe สำหรับรับ response
+                // Create hidden iframe
                 const iframe = document.createElement('iframe');
-                iframe.name = 'gasResponse';
+                iframe.name = 'gasResponseFrame_' + requestId;
                 iframe.style.display = 'none';
                 document.body.appendChild(iframe);
                 
-                // ตั้งค่า event listener สำหรับ iframe load
+                // Create form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = GAS_WEB_APP_URL;
+                form.target = iframe.name;
+                form.style.display = 'none';
+                
+                // Add data as hidden input
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'postData';
+                input.value = JSON.stringify(data);
+                form.appendChild(input);
+                
+                // Handle response
                 iframe.onload = function() {
                     try {
-                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        const responseText = iframeDoc.body.textContent;
-                        const data = JSON.parse(responseText);
+                        showDebug("ได้รับ response จาก iframe");
                         
-                        if (data.success) {
-                            showStatus("ส่งข้อความสำเร็จเรียบร้อย!", true);
+                        let responseText = '';
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        
+                        // Try to get response from various places
+                        if (iframeDoc.body && iframeDoc.body.textContent) {
+                            responseText = iframeDoc.body.textContent;
+                        } else if (iframeDoc.documentElement && iframeDoc.documentElement.textContent) {
+                            responseText = iframeDoc.documentElement.textContent;
                         } else {
-                            throw new Error(data.error || "Unknown Error");
+                            // Try to access through contentWindow
+                            responseText = iframe.contentWindow.document.body.textContent;
                         }
-                    } catch (error) {
-                        showStatus("เกิดข้อผิดพลาด: " + error.message, false);
-                    } finally {
-                        setLoading(false);
-                        // ล้าง iframe และ form
-                        document.body.removeChild(iframe);
-                        document.body.removeChild(form);
-                    }
-                };
-                
-                // ส่ง form
-                form.submit();
-                
-            } catch (error) {
-                showStatus("เกิดข้อผิดพลาด: " + error.message, false);
-                setLoading(false);
-            }
-        }
-
-        // 8. Alternative: ใช้ XMLHttpRequest (รองรับ CORS ได้ดีกว่า)
-        async function sendNotificationWithXHR() {
-            if (!liff.isLoggedIn()) {
-                liff.login({ redirectUri: window.location.href });
-                return;
-            }
-
-            setLoading(true);
-            showStatus("กำลังส่งข้อความ...", true);
-
-            return new Promise((resolve, reject) => {
-                const accessToken = liff.getAccessToken();
-                
-                if(!accessToken) {
-                    reject(new Error("ไม่พบ Access Token"));
-                    return;
-                }
-
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', GAS_WEB_APP_URL, true);
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                
-                xhr.onload = function() {
-                    try {
-                        const data = JSON.parse(xhr.responseText);
-                        if (data.success) {
-                            showStatus("ส่งข้อความสำเร็จเรียบร้อย!", true);
-                            resolve(data);
+                        
+                        showDebug(`Response text: ${responseText.substring(0, 200)}...`);
+                        
+                        if (responseText) {
+                            const result = JSON.parse(responseText);
+                            resolve(result);
                         } else {
-                            throw new Error(data.error || "Unknown Error");
+                            throw new Error("ไม่ได้รับข้อมูลตอบกลับ");
                         }
+                        
                     } catch (error) {
-                        showStatus("เกิดข้อผิดพลาด: " + error.message, false);
                         reject(error);
                     } finally {
-                        setLoading(false);
+                        // Cleanup
+                        setTimeout(() => {
+                            document.body.removeChild(iframe);
+                            document.body.removeChild(form);
+                        }, 1000);
                     }
                 };
                 
-                xhr.onerror = function() {
-                    showStatus("เกิดข้อผิดพลาดในการเชื่อมต่อ", false);
-                    setLoading(false);
-                    reject(new Error("Network Error"));
+                iframe.onerror = function(error) {
+                    reject(new Error("iframe error: " + error));
                 };
                 
-                xhr.send(JSON.stringify({ liffAccessToken: accessToken }));
+                // Add form to body and submit
+                document.body.appendChild(form);
+                form.submit();
+                
+                // Set timeout for safety
+                setTimeout(() => {
+                    if (iframe.parentNode) {
+                        reject(new Error("Request timeout"));
+                    }
+                }, 30000);
             });
         }
-
-        // 9. Helper Functions
-        function setLoading(isLoading) {
-            if (isLoading) {
-                btn.disabled = true;
-                btnText.style.display = 'none';
-                btnLoader.style.display = 'block';
-            } else {
-                btn.disabled = false;
-                btnText.style.display = 'block';
-                btnLoader.style.display = 'none';
+        
+        async function sendViaFetch(data) {
+            showDebug("กำลังใช้วิธี Fetch API...");
+            
+            try {
+                // For Google Apps Script, we need to handle CORS carefully
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Important for GAS
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                // With no-cors, we can't read the response directly
+                // Assume success if no error
+                return { success: true, result: { message: "ส่งสำเร็จ (no-cors mode)" } };
+                
+            } catch (error) {
+                throw error;
             }
         }
-
-        function showStatus(message, isSuccess) {
-            statusMsg.innerText = message;
-            statusMsg.className = isSuccess ? 'success' : 'error';
-            statusMsg.style.opacity = 1;
+        
+        // ========== UI HELPERS ==========
+        function setLoading(loading) {
+            if (loading) {
+                elements.sendBtn.disabled = true;
+                elements.btnText.style.opacity = '0';
+                elements.btnLoader.style.display = 'block';
+                elements.userStatus.textContent = "กำลังส่งข้อความ...";
+            } else {
+                elements.sendBtn.disabled = false;
+                elements.btnText.style.opacity = '1';
+                elements.btnLoader.style.display = 'none';
+                elements.userStatus.textContent = "พร้อมส่งข้อความ";
+            }
         }
-
-        // 10. เปลี่ยน function ที่เรียกจากปุ่ม
-        // เลือกวิธีใดวิธีหนึ่งจาก 3 วิธีด้านบน:
-        // 1. sendNotification() - ใช้ fetch (no-cors)
-        // 2. sendNotificationWithIframe() - ใช้ iframe
-        // 3. sendNotificationWithXHR() - ใช้ XMLHttpRequest
-
-        // ตัวอย่าง: ใช้ XMLHttpRequest
-        window.sendNotification = sendNotificationWithXHR;
-
+        
+        function showStatus(message, show = true, isSuccess = true) {
+            elements.statusMessage.textContent = message;
+            elements.statusMessage.className = 'status-message ' + 
+                (isSuccess ? 'status-success' : 'status-error');
+            
+            if (show) {
+                elements.statusContainer.classList.add('show');
+            } else {
+                elements.statusContainer.classList.remove('show');
+            }
+            
+            // Auto-hide success messages after 5 seconds
+            if (show && isSuccess) {
+                setTimeout(() => {
+                    elements.statusContainer.classList.remove('show');
+                }, 5000);
+            }
+        }
+        
+        function showDebug(message) {
+            if (!debugMode) return;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const debugMessage = `[${timestamp}] ${message}\n`;
+            
+            elements.debugContent.textContent += debugMessage;
+            elements.debugContent.scrollTop = elements.debugContent.scrollHeight;
+        }
+        
+        function toggleDebug() {
+            debugMode = !debugMode;
+            elements.debugContent.classList.toggle('show', debugMode);
+            elements.debugToggle.classList.toggle('active', debugMode);
+            
+            if (debugMode) {
+                showDebug("Debug mode enabled");
+                showDebug(`LIFF ID: ${LIFF_ID}`);
+                showDebug(`GAS URL: ${GAS_WEB_APP_URL}`);
+                showDebug(`User Agent: ${navigator.userAgent}`);
+            }
+        }
+        
+        // ========== ANIMATIONS ==========
+        function animateSuccess() {
+            const button = elements.sendBtn;
+            const originalColor = button.style.background;
+            
+            // Flash animation
+            button.style.background = 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)';
+            
+            setTimeout(() => {
+                button.style.background = originalColor;
+            }, 300);
+            
+            // Bounce animation
+            button.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                button.style.transform = 'scale(1)';
+            }, 150);
+        }
+        
+        // ========== UTILITY FUNCTIONS ==========
+        function showHelp() {
+            const helpMessage = [
+                "📋 วิธีใช้งาน:",
+                "1. กดปุ่ม 'ส่งการแจ้งเตือน' เพื่อส่งข้อความ",
+                "2. รอสักครู่จนกว่าจะส่งสำเร็จ",
+                "3. ตรวจสอบข้อความใน LINE ของคุณ",
+                "",
+                "⚠️ ข้อควรทราบ:",
+                "- ต้องล็อกอินผ่าน LINE ก่อนใช้งาน",
+                "- ต้องอนุญาตการส่งข้อความบริการ",
+                "- ระบบอาจใช้เวลาสักครู่ในการประมวลผล"
+            ].join('\n');
+            
+            alert(helpMessage);
+        }
+        
+        // ========== EVENT LISTENERS ==========
+        document.addEventListener('DOMContentLoaded', initializeApp);
+        
+        // Handle visibility change (for when user returns from login)
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible' && !isInitialized) {
+                setTimeout(initializeApp, 1000);
+            }
+        });
+        
+        // ========== GLOBAL EXPORTS ==========
+        window.sendNotification = sendNotification;
+        window.toggleDebug = toggleDebug;
+        window.showHelp = showHelp;
+        
     </script>
 </body>
 </html>
